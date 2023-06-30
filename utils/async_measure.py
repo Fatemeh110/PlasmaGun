@@ -5,7 +5,7 @@
 import time
 import asyncio
 
-async def async_measure(spec, osc):
+async def async_measure(spec, osc, tc):
     '''
     function to get measurements from all devices asynchronously to optimize
     time to get measurements
@@ -20,9 +20,13 @@ async def async_measure(spec, osc):
                 measurements
     runTime     run time to complete all tasks
     '''
+     # Open the thermal camera
+    await tc.async_open_thermal_camera()
     # create list of tasks to complete asynchronously
     tasks = [asyncio.create_task(async_get_osc(osc)),
-            asyncio.create_task(async_get_spectra(spec))]
+            asyncio.create_task(async_get_spectra(spec)),
+             asyncio.create_task(async_get_tc(tc))]  
+
 
     startTime = time.perf_counter()
     await asyncio.wait(tasks)
@@ -31,6 +35,8 @@ async def async_measure(spec, osc):
     runTime = endTime-startTime
     # print time to complete measurements
     print(f'        ...completed data collection tasks after {runTime:0.4f} seconds')
+     # Close the thermal camera
+    await tc.async_close_thermal_camera()
     return tasks, runTime
 
 
@@ -72,3 +78,18 @@ async def async_get_osc(osc):
     else:
         t, osc_data = osc.collect_data_block()
     return [t, osc_data]
+async def async_get_tc(tc):
+    '''
+    asynchronous definition of capturing thermal camera data
+    Inputs:
+    tc          the thermal camera object as defined in its Class definition
+
+    Outputs:
+    temp        Surface temperature
+    '''
+    if tc is None:
+        await asyncio.sleep(0.1)
+        temp = None
+    else:
+        temp = await tc.async_get_surface_temperature()
+    return temp
