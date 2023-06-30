@@ -91,5 +91,5 @@ async def async_get_tc(tc):
         await asyncio.sleep(0.1)
         temp = None
     else:
-        temp = await tc.async_get_surface_temperature()
-    return temp
+        temp = await tc.getSurfaceTemperature(True, True)
+        return temp
