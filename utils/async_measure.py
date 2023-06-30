@@ -20,8 +20,6 @@ async def async_measure(spec, osc, tc):
                 measurements
     runTime     run time to complete all tasks
     '''
-     # Open the thermal camera
-    await tc.async_open_thermal_camera()
     # create list of tasks to complete asynchronously
     tasks = [asyncio.create_task(async_get_osc(osc)),
             asyncio.create_task(async_get_spectra(spec)),
@@ -35,8 +33,6 @@ async def async_measure(spec, osc, tc):
     runTime = endTime-startTime
     # print time to complete measurements
     print(f'        ...completed data collection tasks after {runTime:0.4f} seconds')
-     # Close the thermal camera
-    await tc.async_close_thermal_camera()
     return tasks, runTime
 
 
